@@ -81,7 +81,10 @@ print(f"Top 10 negative bigrams are: " + ", ".join(top_50_negative_bigrams[:10])
 # extracting features for each piece of text
 def extract_features(text) -> dict:
     features = dict()
-    wordcount = 0
+    positive_wordcount = 0
+    positive_bigrams = 0
+    negative_wordcount = 0
+    negative_bigrams = 0
     compound_scores = list()
     positive_scores = list()
 
@@ -90,7 +93,13 @@ def extract_features(text) -> dict:
     for sentence in nltk.sent_tokenize(text):
         for word in nltk.word_tokenize(sentence):
             if word.casefold() in top_100_positive_words:
-                wordcount += 1
+                positive_wordcount += 1
+            if word.casefold() in top_100_negative_words:
+                negative_wordcount += 1
+        for bigram in top_50_positive_bigrams:
+            positive_bigrams += sentence.count(bigram)
+        for bigram in top_50_negative_bigrams:
+            negative_bigrams += sentence.count(bigram)
         compound_scores.append(sia.polarity_scores(sentence)["compound"])
         positive_scores.append(sia.polarity_scores(sentence)["pos"])
 
@@ -98,7 +107,10 @@ def extract_features(text) -> dict:
     # since some classifiers you'll use later don't work with negative numbers.
     features["mean_compound"] = mean(compound_scores) + 1
     features["mean_positive"] = mean(positive_scores)
-    features["wordcount"] = wordcount
+    features["positive_wordcount"] = positive_wordcount
+    features["negative_wordcount"] = negative_wordcount
+    features["positive_bigrams"] = positive_bigrams
+    features["negative_bigrams"] = negative_bigrams
 
     return features
 
