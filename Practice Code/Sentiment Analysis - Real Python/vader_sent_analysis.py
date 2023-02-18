@@ -44,7 +44,7 @@ def is_positive_movie(review_id: str) -> bool:
 shuffle(all_review_ids)
 correct = 0
 for review_id in all_review_ids:
-    if is_positive(review_id):
+    if is_positive_movie(review_id):
         if review_id in positive_review_ids:
             correct += 1
     else:

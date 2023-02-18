@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 
 def extract_page(url: str) -> BeautifulSoup:
@@ -43,6 +44,8 @@ def isolate_bbc_text(soup: BeautifulSoup) -> [str]:
             """
             if p.get_text() != "":  # ignore blank lines
                 text.append(p.get_text().strip())  # add current line to the end of the current list
+                if p.find("i") is not None:
+                    print(p)
 
     return text  # return all article text
 
@@ -57,11 +60,49 @@ def save_to_corpus(lines: [str], save_location: str):
             f.write(line + "\n")
 
 
-def retrieve_sitemap_data(sitemap_url: str):
-    pass
+def retrieve_sitemap_data(sitemap_url: str) -> [Tag]:
+    """Recursively searches a sitemap to retrieve
+    all urls from all sublevels of the sitemap
+    :param sitemap_url: The url location of the
+    sitemap to retrieve urls from"""
     page = requests.get(sitemap_url)
-    sitemap_xml = BeautifulSoup(page.content, "xml.parser")
+    sitemap_xml = BeautifulSoup(page.content, "lxml-xml")
+    if sitemap_xml.find("sitemapindex") is not None:  # sitemap to other sitemaps
+        urls = []  # master list for urls
+        for sitemap in sitemap_xml.find_all("sitemap"):
+            # for each sub-sitemap, repeat this search and add urls to master list
+            urls.extend(retrieve_sitemap_data(sitemap.loc.get_text()))
+        return urls  # return master list
+    else:  # base level sitemap actual data
+        return sitemap_xml.find_all("url")  # return urls from sitemap
+
+
+def filter_bbc_articles(sitemap_data: [Tag]) -> [Tag]:
+    """Removes any unwanted articles from the list as
+    to not retrieve them. Unwanted articles are those
+    not in English and not from BBC News (CBBC Newsround,
+    BBC Sport, BBC Cymru Fyw, etc.)
+    :param sitemap_data: The original list containing all urls retrieved from the BBC sitemap"""
+    duplicate_data = sitemap_data[:]
+    for article in duplicate_data:  # loop each article in the list
+        if article.language.get_text() != "en" or article.name != "BBC News":
+            # if it is not in English or not from BBC news, remove it from the list
+            sitemap_data.remove(article)
+
+    return sitemap_data  # return the filtered list
 
 
 if __name__ == '__main__':
-    pass
+    # Step 1: Retrieve all relevant article urls from the BBC sitemap
+    bbc_sitemap = "https://www.bbc.co.uk/sitemaps/https-index-uk-news.xml"
+    sitemap_data = retrieve_sitemap_data(bbc_sitemap)
+    print(len(sitemap_data))
+    filter_bbc_articles(sitemap_data)
+
+    print(len(sitemap_data))
+
+    # Step 2: Extract articles
+    for article in sitemap_data:
+        article_url = article.loc.get_text()
+        if article.language.get_text() != "en":
+            print(article.language.get_text())
