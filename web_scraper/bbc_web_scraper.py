@@ -1,4 +1,5 @@
 import requests
+from errors import *
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
@@ -22,7 +23,14 @@ def isolate_bbc_text(soup: BeautifulSoup) -> [str]:
     :param soup: A BeautifulSoup object containing the HTML of a BBC article
     :returns: A list containing each line of relevant text in the article"""
     article = soup.find("article")  # isolate article
-    text = [article.h1.get_text().strip()]  # store article header as 1st line
+
+    try:
+        text = [article.h1.get_text().strip()]  # store article header as 1st line
+    except AttributeError:  # article has no header - not an article (maybe a live feed)
+        raise HeaderNotFound
+    else:
+        if article.h1.get_text().startswith('\n404\n'):
+            raise PageNotFound  # page doesn't exist - no article
 
     text_blocks = [  # retrieve all blocks containing text or headings
         div for div in article.find_all("div")
@@ -45,7 +53,8 @@ def isolate_bbc_text(soup: BeautifulSoup) -> [str]:
             if p.get_text() != "":  # ignore blank lines
                 text.append(p.get_text().strip())  # add current line to the end of the current list
                 if p.find("i") is not None:
-                    print(p)
+                    pass
+                    # print(p)
 
     return text  # return all article text
 
@@ -83,9 +92,9 @@ def filter_bbc_articles(sitemap_data: [Tag]) -> [Tag]:
     not in English and not from BBC News (CBBC Newsround,
     BBC Sport, BBC Cymru Fyw, etc.)
     :param sitemap_data: The original list containing all urls retrieved from the BBC sitemap"""
-    duplicate_data = sitemap_data[:]
+    duplicate_data = sitemap_data.copy()
     for article in duplicate_data:  # loop each article in the list
-        if article.language.get_text() != "en" or article.name != "BBC News":
+        if article.language.get_text() != "en" or article.find("name").get_text() != "BBC News":
             # if it is not in English or not from BBC news, remove it from the list
             sitemap_data.remove(article)
 
@@ -93,16 +102,38 @@ def filter_bbc_articles(sitemap_data: [Tag]) -> [Tag]:
 
 
 if __name__ == '__main__':
+
+    corpus_path = "/Volumes/24265241/BBC Corpus/"
+
     # Step 1: Retrieve all relevant article urls from the BBC sitemap
     bbc_sitemap = "https://www.bbc.co.uk/sitemaps/https-index-uk-news.xml"
-    sitemap_data = retrieve_sitemap_data(bbc_sitemap)
-    print(len(sitemap_data))
-    filter_bbc_articles(sitemap_data)
-
-    print(len(sitemap_data))
+    bbc_sitemap_data = retrieve_sitemap_data(bbc_sitemap)
+    filter_bbc_articles(bbc_sitemap_data)
 
     # Step 2: Extract articles
-    for article in sitemap_data:
-        article_url = article.loc.get_text()
-        if article.language.get_text() != "en":
-            print(article.language.get_text())
+    for article_data in bbc_sitemap_data:
+        # get page data
+        article_url = article_data.loc.get_text()
+        article_html = extract_page(article_url)
+
+        try:
+            # Step 3: Filter relevant data
+            article_text = isolate_bbc_text(article_html)
+            if len(article_text) < 5:
+                # skip short articles that are likely videos with a few
+                # summary lines, rather than actual articles
+                continue
+
+            # Step 4: Save article to corpus
+            save_name = article_url[str(article_url).rfind("/"):] + ".txt"
+            save_to_corpus(article_text, corpus_path + save_name)
+
+        # Handle bad articles
+        except HeaderNotFound:
+            print("No header found for this article:")
+            print(article_url)
+            print("It has been disregarded\n")
+        except PageNotFound:
+            print("No page found for this article:")
+            print(article_url)
+            print("It has been disregarded\n")
