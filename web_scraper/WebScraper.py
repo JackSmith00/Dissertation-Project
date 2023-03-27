@@ -73,14 +73,26 @@ class WebScraper:
             self.oldest_page = None
             self.latest_page = None
 
-    @abstractmethod
     def update_date_range(self, page_data: BeautifulSoup):
         """Used to update the date range of the corpus
         for storage in the timestamp
         :param page_data: The BeautifulSoup object containing
         all info on a url from which the date of the page can
         be retrieved"""
-        pass
+        # retrieve publish date of page
+        publish_date = date.fromisoformat(page_data.find("publication_date").get_text()[:10])
+
+        # check timestamps already exist, if not, set them
+        if self.latest_page is None:
+            self.latest_page = publish_date
+        # otherwise, compare and set
+        elif publish_date > self.latest_page:
+            self.latest_page = publish_date
+
+        if self.oldest_page is None:
+            self.oldest_page = publish_date
+        elif publish_date < self.oldest_page:
+            self.oldest_page = publish_date
 
     def timestamp(self):
         to_save = [f"Last collected: {str(date.today())}"]
@@ -120,34 +132,35 @@ class WebScraper:
 
         count = 0  # to track when limit is reached
 
-        # Step 2: Extract pages
-        for page_data in sitemap_data:
-            # get page data
-            page_url = page_data.loc.get_text()
-            page_html = extract_page(page_url)
+        try:  # ensures timestamp is always created, even if unexpected error occurs
+            # Step 2: Extract pages
+            for page_data in sitemap_data:
+                # get page data
+                page_url = page_data.loc.get_text()
+                page_html = extract_page(page_url)
 
-            # Step 3: Filter relevant data
-            try:
-                page_text = self.isolate_text(page_html)
-            except HeaderNotFound:
-                print("No header found for this article:")
-                print(page_url)
-                print("It has been disregarded\n")
-            except PageNotFound:
-                print("No page found for this article:")
-                print(page_url)
-                print("It has been disregarded\n")
-            else:  # when text is successfully isolated
-                if self.page_is_irrelevant(page_text):
-                    continue
-                else:  # page is relevant
-                    # Step 4: Save page to corpus
-                    save_name = page_url[str(page_url).rfind("/"):] + ".txt"
-                    save(page_text, self.save_location + save_name)
+                # Step 3: Filter relevant data
+                try:
+                    page_text = self.isolate_text(page_html)
+                except HeaderNotFound:
+                    print("No header found for this article:")
+                    print(page_url)
+                    print("It has been disregarded\n")
+                except PageNotFound:
+                    print("No page found for this article:")
+                    print(page_url)
+                    print("It has been disregarded\n")
+                else:  # when text is successfully isolated
+                    if self.page_is_irrelevant(page_text):
+                        continue
+                    else:  # page is relevant
+                        # Step 4: Save page to corpus
+                        save_name = page_url[str(page_url).rfind("/"):] + ".txt"
+                        save(page_text, self.save_location + save_name)
 
-                    self.update_date_range(page_data)  # update timestamp
-                    count += 1  # increase successful extraction count
-                    if count >= limit != -1:
-                        break
-
-        self.timestamp()  # timestamp the corpus
+                        self.update_date_range(page_data)  # update timestamp
+                        count += 1  # increase successful extraction count
+                        if count >= limit != -1:
+                            break
+        finally:
+            self.timestamp()  # timestamp the corpus
