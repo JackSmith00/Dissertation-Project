@@ -4,14 +4,33 @@ https://www.bbc.co.uk/robots.txt
 
 @author: Jack Smith
 """
+import datetime
+
 from bs4 import BeautifulSoup
 from web_scraper.WebScraper import WebScraper
 from web_scraper.errors import *
+from datetime import date
 
 
 class BBCWebScraper(WebScraper):
     """Creates objects that can scrape relevant text
     from BBC articles and save to a predefined location"""
+
+    def update_date_range(self, page_data: BeautifulSoup):
+        # retrieve publish date of page
+        publish_date = date.fromisoformat(page_data.find("publication_date").get_text()[:10])
+
+        # check timestamps already exist, if not, set them
+        if self.latest_page is None:
+            self.latest_page = publish_date
+        # otherwise, compare and set
+        elif publish_date > self.latest_page:
+            self.latest_page = publish_date
+
+        if self.oldest_page is None:
+            self.oldest_page = publish_date
+        elif publish_date < self.oldest_page:
+            self.oldest_page = publish_date
 
     def isolate_text(self, soup: BeautifulSoup) -> [str]:
         """Takes the HTML of a BBC article as a BeautifulSoup object and
@@ -74,15 +93,9 @@ class BBCWebScraper(WebScraper):
         :returns: true when the article is too short"""
         return len(page_text) < 5
 
-    def scrape(self):
-        try:
-            super().scrape()
-        except HeaderNotFound or PageNotFound as e:
-            print(e)
-
 
 if __name__ == '__main__':
 
     bbc_web_scraper = BBCWebScraper("https://www.bbc.co.uk/sitemaps/https-index-uk-news.xml",
-                                    "/Volumes/24265241/BBC Corpus")
+                                    "/Volumes/24265241/News Corpus/BBC Corpus")
     bbc_web_scraper.scrape()
