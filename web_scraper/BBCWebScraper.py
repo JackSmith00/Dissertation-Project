@@ -4,8 +4,6 @@ https://www.bbc.co.uk/robots.txt
 
 @author: Jack Smith
 """
-import datetime
-
 from bs4 import BeautifulSoup
 from web_scraper.WebScraper import WebScraper
 from web_scraper.errors import *
