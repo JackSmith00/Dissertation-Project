@@ -5,7 +5,6 @@ https://www.independent.co.uk/robots.txt
 @author: Jack Smith
 """
 from bs4 import BeautifulSoup
-
 from web_scraper.WebScraper import WebScraper
 from web_scraper.errors import *
 
@@ -59,5 +58,5 @@ class IndependentWebScraper(WebScraper):
 
 if __name__ == '__main__':
     independent_web_scraper = IndependentWebScraper("https://www.independent.co.uk/sitemaps/googlenews",
-                                                    "/Volumes/24265241/News Corpus/Independent Corpus")
+                                                    "/Volumes/24265241/News Corpus/Independent Corpus/New")
     independent_web_scraper.scrape()

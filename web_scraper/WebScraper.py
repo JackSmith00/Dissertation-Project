@@ -156,6 +156,8 @@ class WebScraper:
                     else:  # page is relevant
                         # Step 4: Save page to corpus
                         save_name = page_url[str(page_url).rfind("/"):] + ".txt"
+                        if save_name.endswith(".html.txt"):  # handle pages that end with .html
+                            save_name = str(save_name).replace(".html.txt", ".txt")
                         save(page_text, self.save_location + save_name)
 
                         self.update_date_range(page_data)  # update timestamp
