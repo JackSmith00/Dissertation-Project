@@ -43,7 +43,7 @@ class IndependentWebScraper(WebScraper):
         to not retrieve them. Unwanted articles are those
         on the subject of sports (found in /sports and /f1)
         or video articles with little text data
-        :param sitemap_data: The original list containing all urls retrieved from the Om sitemap"""
+        :param sitemap_data: The original list containing all urls retrieved from the sitemap"""
         duplicate_data = sitemap_data.copy()
         for article in duplicate_data:  # filter sports and video articles
             if article.loc.get_text().startswith("https://www.independent.co.uk/sport") \
@@ -52,11 +52,8 @@ class IndependentWebScraper(WebScraper):
                 # if the article is a sports article
                 sitemap_data.remove(article)
 
-    def page_is_irrelevant(self, page_text: [str]) -> bool:
-        pass
-
 
 if __name__ == '__main__':
     independent_web_scraper = IndependentWebScraper("https://www.independent.co.uk/sitemaps/googlenews",
-                                                    "/Volumes/24265241/News Corpus/Independent Corpus/New")
+                                                    "/Volumes/24265241/News Corpus/Independent Corpus")
     independent_web_scraper.scrape()
