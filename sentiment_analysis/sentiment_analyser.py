@@ -7,6 +7,7 @@ from textblob import TextBlob
 from flair.models import TextClassifier
 from flair.data import Sentence
 import pandas as pd
+from tqdm import tqdm
 
 corpora_regex = "[a-zA-Z0-9-]*.txt"
 
@@ -20,7 +21,7 @@ def analyse_corpus(corpus: nltk.corpus.CorpusReader) -> pd.DataFrame:
     files = corpus.fileids()
 
     data = []  # hold all retrieved data
-    for file in files:  # loop every file for analysis
+    for file in tqdm(files, desc="Corpus"):  # loop every file for analysis
         sentences = sent_tokenize(corpus.raw(file))  # tokenise sentences
         # create lists to hold scores for each sentence in the article
         pos_scores = []
@@ -60,12 +61,18 @@ def analyse_corpus(corpus: nltk.corpus.CorpusReader) -> pd.DataFrame:
 if __name__ == '__main__':
     # Step 1 - Read the Corpora
     # bbc_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/BBC Corpus", corpora_regex)
-    independent_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/Independent Corpus", corpora_regex)
+    # independent_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/Independent Corpus", corpora_regex)
+    daily_mail_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/Daily Mail Corpus", corpora_regex)
+    chat_gpt_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/ChatGPT Corpus", corpora_regex)
 
     # Step 2 - Perform analysis
     # bbc_df = analyse_corpus(bbc_corpus)
-    independent_df = analyse_corpus(independent_corpus)
+    # independent_df = analyse_corpus(independent_corpus)
+    daily_mail_df = analyse_corpus(daily_mail_corpus)
+    daily_mail_df.to_csv("/Volumes/24265241/Analysis Results/daily_mail_df.csv")  # move back
+    chat_gpt_df = analyse_corpus(chat_gpt_corpus)
 
     # Step 3 - Export analysis data to CSV
     # bbc_df.to_csv("/Volumes/24265241/Analysis Results/bbc_df.csv")
-    independent_df.to_csv("/Volumes/24265241/Analysis Results/independent_df.csv")
+    # independent_df.to_csv("/Volumes/24265241/Analysis Results/independent_df.csv")
+    chat_gpt_df.to_csv("/Volumes/24265241/Analysis Results/chat_gpt_df.csv")

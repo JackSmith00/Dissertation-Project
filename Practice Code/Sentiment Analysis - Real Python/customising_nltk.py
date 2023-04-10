@@ -8,7 +8,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
-from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
 unwanted = nltk.corpus.stopwords.words("english")
 unwanted.extend([w.lower() for w in nltk.corpus.names.words()])  # ignore any names that may appear
