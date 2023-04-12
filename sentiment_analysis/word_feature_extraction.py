@@ -1,4 +1,4 @@
-from nltk.corpus import subjectivity, stopwords, names, PlaintextCorpusReader, LazyCorpusLoader
+from nltk.corpus import subjectivity, stopwords, names, PlaintextCorpusReader
 from nltk.collocations import BigramCollocationFinder
 from nltk import pos_tag, FreqDist
 
@@ -61,8 +61,8 @@ if __name__ == '__main__':
     remove_common_features(subjective_bigrams, objective_bigrams)
 
     # # # save subjectivity features
-    save_features(subjective_words.most_common(150), "features/subjective_words.txt")
-    save_features(objective_words.most_common(150), "features/objective_words.txt")
+    save_features(subjective_words.most_common(200), "features/subjective_words.txt")
+    save_features(objective_words.most_common(200), "features/objective_words.txt")
     save_features(subjective_bigrams.most_common(30), "features/subjective_bigrams.txt")
     save_features(objective_bigrams.most_common(30), "features/objective_bigrams.txt")
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     remove_common_features(biased_bigrams, non_biased_bigrams)
 
     # save media bias features
-    save_features(biased_words.most_common(150), "features/biased_words.txt")
-    save_features(non_biased_words.most_common(150), "features/non_biased_words.txt")
+    save_features(biased_words.most_common(200), "features/biased_words.txt")
+    save_features(non_biased_words.most_common(200), "features/non_biased_words.txt")
     save_features(biased_bigrams.most_common(30), "features/biased_bigrams.txt")
     save_features(non_biased_bigrams.most_common(30), "features/non_biased_bigrams.txt")
