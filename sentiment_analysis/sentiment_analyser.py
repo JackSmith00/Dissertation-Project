@@ -11,12 +11,12 @@ from tqdm import tqdm
 
 corpora_regex = "[a-zA-Z0-9-]*.txt"
 
+# initialise the VADER and Flair analysers
+vader = SentimentIntensityAnalyzer()
+flair = TextClassifier.load("en-sentiment")
+
 
 def analyse_corpus(corpus: nltk.corpus.CorpusReader) -> pd.DataFrame:
-    # initialise the VADER and Flair analysers
-    vader = SentimentIntensityAnalyzer()
-    flair = TextClassifier.load("en-sentiment")
-
     # get file ids
     files = corpus.fileids()
 
@@ -60,19 +60,16 @@ def analyse_corpus(corpus: nltk.corpus.CorpusReader) -> pd.DataFrame:
 
 if __name__ == '__main__':
     # Step 1 - Read the Corpora
-    # bbc_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/BBC Corpus", corpora_regex)
-    # independent_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/Independent Corpus", corpora_regex)
-    daily_mail_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/Daily Mail Corpus", corpora_regex)
-    chat_gpt_corpus = PlaintextCorpusReader("/Volumes/24265241/News Corpus/ChatGPT Corpus", corpora_regex)
+    corpora = {
+        "bbc": PlaintextCorpusReader("/Volumes/24265241/News Corpus/BBC Corpus", corpora_regex),
+        "independent": PlaintextCorpusReader("/Volumes/24265241/News Corpus/Independent Corpus", corpora_regex),
+        "daily_mail": PlaintextCorpusReader("/Volumes/24265241/News Corpus/Daily Mail Corpus", corpora_regex),
+        "chat_gpt": PlaintextCorpusReader("/Volumes/24265241/News Corpus/ChatGPT Corpus", corpora_regex)
+    }
 
-    # Step 2 - Perform analysis
-    # bbc_df = analyse_corpus(bbc_corpus)
-    # independent_df = analyse_corpus(independent_corpus)
-    daily_mail_df = analyse_corpus(daily_mail_corpus)
-    daily_mail_df.to_csv("/Volumes/24265241/Analysis Results/daily_mail_df.csv")  # move back
-    chat_gpt_df = analyse_corpus(chat_gpt_corpus)
+    for corpus_name, corpus in corpora.items():
+        # Step 2 - Perform analysis
+        df = analyse_corpus(corpus)
 
-    # Step 3 - Export analysis data to CSV
-    # bbc_df.to_csv("/Volumes/24265241/Analysis Results/bbc_df.csv")
-    # independent_df.to_csv("/Volumes/24265241/Analysis Results/independent_df.csv")
-    chat_gpt_df.to_csv("/Volumes/24265241/Analysis Results/chat_gpt_df.csv")
+        # Step 3 - Export analysis data to CSV
+        df.to_csv(f"/Volumes/24265241/Analysis Results/Unsupervised results/{corpus_name}_results.csv")
