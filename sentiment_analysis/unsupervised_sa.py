@@ -1,3 +1,13 @@
+"""
+Used to analyse the sentiment of news articles using an unsupervised approach
+based on the VADER sentiment lexicon, and the textblob sentiment lexicon.
+
+A pre-trained flair model has also been utilised for analysis, although
+this was trained on a dataset of movie reviews so may not be completely
+accurate for news articles.
+
+@author: Jack Smith
+"""
 import nltk.corpus
 from nltk.corpus import PlaintextCorpusReader
 from nltk.sentiment import SentimentIntensityAnalyzer
@@ -17,6 +27,10 @@ flair = TextClassifier.load("en-sentiment")
 
 
 def analyse_corpus(corpus: nltk.corpus.CorpusReader) -> pd.DataFrame:
+    """Used to analyse an entire corpus and return results as a
+    pandas DataFrame
+    :param corpus: The corpus to analyse
+    :return: A pandas dataframe of the analysis results"""
     # get file ids
     files = corpus.fileids()
 
