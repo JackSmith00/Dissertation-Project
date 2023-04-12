@@ -4,12 +4,12 @@ for saving webpage data to a corpus.
 @author: Jack Smith
 """
 import os.path
-
 import requests
 from bs4 import Tag, BeautifulSoup
 from web_scraper.errors import *
 from abc import abstractmethod
 from datetime import date
+from tqdm import tqdm
 
 
 def retrieve_sitemap_data(sitemap_url: str, limit: int = -1) -> [Tag]:
@@ -134,7 +134,7 @@ class WebScraper:
 
         try:  # ensures timestamp is always created, even if unexpected error occurs
             # Step 2: Extract pages
-            for page_data in sitemap_data:
+            for page_data in tqdm(sitemap_data, desc="Progress"):
                 # get page data
                 page_url = page_data.loc.get_text()
                 page_html = extract_page(page_url)

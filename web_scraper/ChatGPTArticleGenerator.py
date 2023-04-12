@@ -23,7 +23,7 @@ def generate_article():
 if __name__ == '__main__':
 
     try:
-        for i in tqdm(range(64)):
+        for i in tqdm(range(280, 500)):
             request_made = time.time()
             article = generate_article()
             lines = article.split("\n")
@@ -39,7 +39,7 @@ if __name__ == '__main__':
             if lines[0].startswith("Possible news article:"):
                 lines.pop(0)
 
-            with open(f"/Volumes/24265241/News Corpus/ChatGPT Corpus/article{i + 136}.txt", "w") as f:
+            with open(f"/Volumes/24265241/News Corpus/ChatGPT Corpus/article{i}.txt", "w") as f:
                 for line in lines:
                     if line != "":
                         f.write(line + "\n")
