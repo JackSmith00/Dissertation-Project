@@ -1,7 +1,7 @@
 import pandas as pd
 from nltk.corpus import stopwords
 
-labeled_dataset = pd.read_csv("/Volumes/24265241/Unsupervised Training/labeled_dataset.csv")
+labeled_dataset = pd.read_csv("/Volumes/24265241/Supervised Training/labeled_dataset.csv")
 
 
 def extract_biased_words(save_path: str):
@@ -34,16 +34,16 @@ def extract_training_data():
         if article[1].__class__ != str:
             continue
         if article[0] == "Biased":
-            with open(f"/Volumes/24265241/Unsupervised Training/Biased/article{biased_article_count}.txt", "w") as f:
+            with open(f"/Volumes/24265241/Supervised Training/Biased/article{biased_article_count}.txt", "w") as f:
                 f.write(article[1])
                 biased_article_count += 1
         elif article[0] == "Non-biased":
-            with open(f"/Volumes/24265241/Unsupervised Training/Non-biased/article{non_biased_article_count}.txt",
+            with open(f"/Volumes/24265241/Supervised Training/Non-biased/article{non_biased_article_count}.txt",
                       "w") as f:
                 f.write(article[1])
                 non_biased_article_count += 1
         else:
-            with open(f"/Volumes/24265241/Unsupervised Training/Unclassified/article{unclassified_article_count}.txt",
+            with open(f"/Volumes/24265241/Supervised Training/Unclassified/article{unclassified_article_count}.txt",
                       "w") as f:
                 f.write(article[1])
                 unclassified_article_count += 1
@@ -51,5 +51,5 @@ def extract_training_data():
 
 if __name__ == '__main__':
 
-    extract_biased_words("/Volumes/24265241/Unsupervised Training/biased_words.txt")
+    extract_biased_words("/Volumes/24265241/Supervised Training/biased_words.txt")
     extract_training_data()
