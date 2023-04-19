@@ -86,4 +86,4 @@ if __name__ == '__main__':
         df = analyse_corpus(corpus)
 
         # Step 3 - Export analysis data to CSV
-        df.to_csv(f"/Volumes/24265241/Analysis Results/Unsupervised results/{corpus_name}_results.csv")
+        df.to_csv(f"/Volumes/24265241/Analysis Results/Unsupervised Results/{corpus_name}_results.csv")
