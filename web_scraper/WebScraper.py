@@ -109,10 +109,10 @@ class WebScraper:
         pass
 
     def page_is_irrelevant(self, page_text: [str]) -> bool:
-        """Can be extended to check the contents of page text
-        and determine if the page is relevant or not
-        :returns: True when the page should be ignored"""
-        return False
+        """Will skip short articles that are likely videos with a few
+        summary lines, rather than actual articles
+        :returns: true when the article is too short"""
+        return len(page_text) < 5
 
     def isolate_text(self, soup: BeautifulSoup) -> [str]:
         """Takes the HTML of a webpage as a BeautifulSoup object and
@@ -143,11 +143,11 @@ class WebScraper:
                 try:
                     page_text = self.isolate_text(page_html)
                 except HeaderNotFound:
-                    print("No header found for this article:")
+                    print("\nNo header found for this article:")
                     print(page_url)
                     print("It has been disregarded\n")
                 except PageNotFound:
-                    print("No page found for this article:")
+                    print("\nNo page found for this article:")
                     print(page_url)
                     print("It has been disregarded\n")
                 else:  # when text is successfully isolated

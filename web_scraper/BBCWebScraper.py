@@ -68,12 +68,6 @@ class BBCWebScraper(WebScraper):
                 # if it is not in English or not from BBC news, remove it from the list
                 sitemap_data.remove(article)
 
-    def page_is_irrelevant(self, page_text: [str]) -> bool:
-        """Will skip short articles that are likely videos with a few
-        summary lines, rather than actual articles
-        :returns: true when the article is too short"""
-        return len(page_text) < 5
-
 
 if __name__ == '__main__':
 
