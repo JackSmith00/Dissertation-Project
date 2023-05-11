@@ -19,7 +19,7 @@ from flair.data import Sentence
 import pandas as pd
 from tqdm import tqdm
 
-corpora_regex = "[a-zA-Z0-9-]*.txt"
+corpora_regex = "[a-zA-Z0-9-]*.txt"  # common regex for accessing news article corpora
 
 # initialise the VADER and Flair analysers
 vader = SentimentIntensityAnalyzer()

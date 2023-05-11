@@ -1,3 +1,21 @@
+"""
+This file will extend the VADER lexicon by adding words and
+their associated sentiment from 2 additional sentiment lexicons.
+Words that already exist in the lexicon are not added again so that
+they are not scored twice. The VADER score is taken as it has weighting
+to the sentiment, whereas the new words are scored only as positive/negitive
+due to a lack of further data.
+
+The additional lexicon were found at the following resources:
+
+Mohammad, S. M., 2011. The NRC Emotion Intensity Lexicon (NRC-EIL) [online].
+Available from: http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm
+[Accessed 19 April 2023].
+
+Loughran, T. & McDonald, B., 2022. Loughran-McDonald Master Dictionary w/ Sentiment Word Lists [online].
+Available from: https://sraf.nd.edu/loughranmcdonald-master-dictionary/
+[Accessed 19 April 2023].
+"""
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 # get a copy of the original vader lexicon
@@ -65,11 +83,11 @@ for line in lm_lexicon_lines:
     else:
         new_lexicon_dict[word] = -2
 
-# encorporate new entries into vader lexicon
+# incorporate new entries into vader lexicon
 for word, score in new_lexicon_dict.items():
     vader_lexicon_lines.append(f"{word}\t{score}\r")
 
-# save new vader lexicon to overwrite existing
+# save new vader lexicon - overwrite existing
 with open("/Users/Jack/nltk_data/sentiment/vader_lexicon/vader_lexicon.txt", "w") as f:
     for line in vader_lexicon_lines:
         f.write(line + "\n")

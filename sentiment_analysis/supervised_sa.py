@@ -3,7 +3,11 @@ Used to analyse the sentiment of news articles using a supervised approach
 and give each article a classification of either biased or non-biased.
 
 Features that were used for the classification are also output so that they
-can also be analysed
+can also be analysed.
+
+Some features have been commented out as they have been found to reduce accuracy
+or serve no benefit, however, these lines have not been removed simply for future
+reference to these redundant features.
 
 @author: Jack Smith
 """
@@ -55,7 +59,7 @@ objective_bigrams = []
 # inconclusive_bigrams = []
 
 # holds features extracted from the labelled dataset meaning it can be stored and retrieved easier in future
-labeled_dataset_features = []
+labelled_dataset_features = []
 
 
 def load_feature(feature: list, location: str):
@@ -141,8 +145,6 @@ def extract_features(text: str) -> dict:
             # if word.casefold() in inconclusive_words:
             #     inconclusive_word_count += 1
 
-
-
         # check for bigrams in each sentence
         for bigram in biased_bigrams:
             biased_bigram_count += sentence.count(bigram)
@@ -192,26 +194,30 @@ def extract_features(text: str) -> dict:
     return extracted_features
 
 
-def get_labeled_features():
+def get_labelled_features():
+    """
+    Populate the `labelled_dataset_features` list from an existing save where possible,
+    otherwise, extract features from the labelled dataset and save for future use
+    """
     if os.path.exists("/Volumes/24265241/Supervised Training/labeled_dataset_features.pkl"):
         with open("/Volumes/24265241/Supervised Training/labeled_dataset_features.pkl", "rb") as file:
-            labeled_dataset_features.extend(pickle.load(file))
+            labelled_dataset_features.extend(pickle.load(file))
     else:
         biased_articles = PlaintextCorpusReader("/Volumes/24265241/Supervised Training/Biased", corpora_regex)
         non_biased_articles = PlaintextCorpusReader("/Volumes/24265241/Supervised Training/Non-biased", corpora_regex)
 
-        labeled_dataset_features.extend([
+        labelled_dataset_features.extend([
             (extract_features(biased_articles.raw(article)), 'biased')
             for article in tqdm(biased_articles.fileids(), desc="Biased feature extraction")
         ])
 
-        labeled_dataset_features.extend([
+        labelled_dataset_features.extend([
             (extract_features(non_biased_articles.raw(article)), 'not biased')
             for article in tqdm(non_biased_articles.fileids(), desc="Non-biased feature extraction")
         ])
 
         with open("/Volumes/24265241/Supervised Training/labeled_dataset_features.pkl", "wb") as file:
-            pickle.dump(labeled_dataset_features, file)
+            pickle.dump(labelled_dataset_features, file)
 
 
 def old_test_classifiers(no_tests: int):
@@ -228,14 +234,14 @@ def old_test_classifiers(no_tests: int):
         "AdaBoostClassifier": []
     }
     for i in tqdm(range(1, no_tests + 1), desc="Models Test", colour="green"):
-        train_count = (len(labeled_dataset_features) // 4) * 3  # train with 75% of the dataset
+        train_count = (len(labelled_dataset_features) // 4) * 3  # train with 75% of the dataset
 
-        shuffle(labeled_dataset_features)
+        shuffle(labelled_dataset_features)
         model_accuracies = dict()
 
         # handle naive bayes separately as from nltk not sklearn
-        naive_bayes = NaiveBayesClassifier.train(labeled_dataset_features[:train_count])
-        model_accuracies["Naive Bayes"] = accuracy(naive_bayes, labeled_dataset_features[train_count:])
+        naive_bayes = NaiveBayesClassifier.train(labelled_dataset_features[:train_count])
+        model_accuracies["Naive Bayes"] = accuracy(naive_bayes, labelled_dataset_features[train_count:])
 
         # handle remaining classifiers
         sklearn_classifiers = {
@@ -252,8 +258,8 @@ def old_test_classifiers(no_tests: int):
 
         for model_name, model in sklearn_classifiers.items():
             classifier = SklearnClassifier(model)
-            classifier.train(labeled_dataset_features[:train_count])
-            model_accuracies[model_name] = accuracy(classifier, labeled_dataset_features[train_count:])
+            classifier.train(labelled_dataset_features[:train_count])
+            model_accuracies[model_name] = accuracy(classifier, labelled_dataset_features[train_count:])
             all_accuracies[model_name].append(model_accuracies[model_name])
 
         table = tabulate(model_accuracies.items(), headers=["Model", "Accuracy"])
@@ -288,16 +294,16 @@ def test_classifiers(no_tests: int):
     }
 
     for i in tqdm(range(1, no_tests + 1), desc="Models Test", colour="green"):
-        train_count = (len(labeled_dataset_features) // 4) * 3  # train with 75% of the dataset
+        train_count = (len(labelled_dataset_features) // 4) * 3  # train with 75% of the dataset
 
-        shuffle(labeled_dataset_features)
-        X, y = split_featureset(labeled_dataset_features)
+        shuffle(labelled_dataset_features)
+        X, y = split_featureset(labelled_dataset_features)
 
         model_accuracies = dict()
 
         # handle naive bayes separately as from nltk not sklearn
-        naive_bayes = NaiveBayesClassifier.train(labeled_dataset_features[:train_count])
-        model_accuracies["Naive Bayes"] = test_naive_bayes(naive_bayes, labeled_dataset_features[train_count:])
+        naive_bayes = NaiveBayesClassifier.train(labelled_dataset_features[:train_count])
+        model_accuracies["Naive Bayes"] = test_naive_bayes(naive_bayes, labelled_dataset_features[train_count:])
         all_accuracies["NaiveBayes"].append(model_accuracies["Naive Bayes"])
 
         # handle remaining classifiers
@@ -400,8 +406,8 @@ if __name__ == '__main__':
     load_all_features()
 
     # get features for training
-    get_labeled_features()
-    features, truth = split_featureset(labeled_dataset_features)
+    get_labelled_features()
+    features, truth = split_featureset(labelled_dataset_features)
 
     # train various classifiers and test to find the best accuracies
     # test_classifiers(100)

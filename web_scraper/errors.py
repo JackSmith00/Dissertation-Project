@@ -1,3 +1,8 @@
+"""
+Errors that can be thrown during the scraping of news articles from the web.
+
+@author: Jack Smith
+"""
 class PageNotFound(Exception):
     """Raised when attempting to extract an
     article from an invalid address"""
